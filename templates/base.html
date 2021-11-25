@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>API voiture electrique</title>
+</head>
+
+<body>
+    <h1>API voiture electrique</h1>
+        <form action "config.py" method="post">
+        <div>
+        <label for="depart">depart:</label>
+        <input type="text" id="depart" name="depart" />
+        <div>
+        <div>
+        <label for="arrivee">arrivee:</label>
+        <input type="text" id="arrivee" name="arrivee" />
+        </div>
+        <div class="button">
+        <input id="submit" type="button" value="ok" />
+        </div>
+        </form>
+    {% block content %}
+    {% endblock %}
+
+</body>
+
+</html>
