@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>API voiture electrique</title>
 </head>
 
 <body>
     <h1>API voiture electrique</h1>
-        <form action "config.py" method="post">
+        <form id='test' action="{{ url_for("resultat")}}"" method='post'>
         <div>
         <label for="depart">depart:</label>
         <input type="text" id="depart" name="depart" />
@@ -16,8 +15,8 @@
         <label for="arrivee">arrivee:</label>
         <input type="text" id="arrivee" name="arrivee" />
         </div>
-        <div class="button">
-        <input id="submit" type="button" value="ok" />
+        <input type="submit">Submit</input>
+        </form>
         </div>
         </form>
     {% block content %}

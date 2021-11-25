@@ -93,4 +93,4 @@ def getCoordonates(city):
     return coord
 
 
-trajectory("Paris","Toulouse",500)
+trajectory("Paris","Toulouse",200)

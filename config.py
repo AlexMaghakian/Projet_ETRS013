@@ -83,9 +83,9 @@ lat_2=45.64720916748047
 lon_2=5.860020160675049
 """
 
-def  duration():
-        coordDest=setDest('Valence')
-        coordSrc=setSource('Lyon')
+def  duration(coordDest,coordSrc):
+        #coordDest=setDest('Valence')
+        #coordSrc=setSource('Lyon')
         r = requests.get(f"http://router.project-osrm.org/route/v1/car/{coordDest[0]},{coordDest[1]};{coordSrc[0]},{coordSrc[1]}?overview=false""")
         # then you load the response using the json libray
         # by default you get only one alternative so you access 0-th element of the `routes`
@@ -98,5 +98,12 @@ def  duration():
         heure=min/60
         print('min',min)
         print('heure',heure)
+        return heure
         
-duration()
+"""
+coordDest[0]='4.9259615'
+coordDest[1]='44.9488295'
+coordSrc[0]='5.860020160675049'
+coordSrc[1]='45.64720916748047'
+duration(coordDest[0],coordDest[1],coordSrc[0],coordSrc[1])
+"""

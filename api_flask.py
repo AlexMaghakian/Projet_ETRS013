@@ -35,20 +35,33 @@ coordDest=setDest('Valence')
 coordSrc=setSource('Paris')
 @app.route("/")
 def index():
-    return render_template("index.html", message="Hello Flask!");
+    return render_template("index.html");
 
 
-@app.route('/index',methods=['GET', 'POST'])
+@app.route('/test',methods=['GET', 'POST'])
 def resultat():
+    duree=''
     if request.method == 'GET':
-        depart = request.args.get('depart')
-        arrivee = request.args.get('arrivee')
-        return redirect(url_for('success',name=depart))
+        #depart = request.args.get('depart')
+        #arrivee = request.args.get('arrivee')
+        return render_template("index.html")
     else:             
-        coordSrc = request.form['depart']
-        coordDest = request.form['arrivee']
-        return render_template("index/index.html", depart=coordSrc[0],arrivee=coordDest[1])
+        #coordSrc = request.form['depart']
+        #coordDest = request.form['arrivee']
+        depart = request.form.get("depart")
+        arrivee = request.form.get("arrivee")
+        #arrivee=setDest(arrivee)
+        #depart=setSource(depart)
+        print(arrivee)
+        print(depart)
+        coordDest=setDest(arrivee)
+        print('coordDest',coordDest)
+        coordSrc=setDest(depart)
+        print('coordSrc',coordSrc)
+        duree=duration(coordDest,coordSrc)
+        return render_template("index.html",depart=depart,arrivee=arrivee, duree=duree)
 
+    
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

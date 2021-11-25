@@ -13,3 +13,15 @@ URI:
 postgres://ilawzmnlunxuiy:5104cead965e1a18bc822c7611725f5e67cf99eb68f2db1c403ccc1d3b5f0050@ec2-52-213-119-221.eu-west-1.compute.amazonaws.com:5432/damtnm2jbpjhko
 Heroku CLI:
 heroku pg:psql postgresql-infinite-36869 --app etrs013
+
+
+Use Git to clone etrs013's source code to your local machine.
+
+$ heroku git:clone -a etrs013
+$ cd etrs013
+Deploy your changes
+Make some changes to the code you just cloned and deploy them to Heroku using Git.
+
+$ git add .
+$ git commit -am "make it better"
+$ git push heroku master
