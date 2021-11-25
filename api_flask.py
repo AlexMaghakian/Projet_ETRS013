@@ -31,8 +31,8 @@ class Usersimple(Resource):
         return {'hello to you': userlist[user_id]}
 """
 
-coordDest=setDest('Valence')
-coordSrc=setSource('Paris')
+coordDest=get_destination('Valence')
+coordSrc=get_source('Paris')
 @app.route("/")
 def index():
     return render_template("index.html");
@@ -46,20 +46,19 @@ def resultat():
         #arrivee = request.args.get('arrivee')
         return render_template("index.html")
     else:             
-        #coordSrc = request.form['depart']
-        #coordDest = request.form['arrivee']
         depart = request.form.get("depart")
         arrivee = request.form.get("arrivee")
-        #arrivee=setDest(arrivee)
-        #depart=setSource(depart)
-        print(arrivee)
-        print(depart)
-        coordDest=setDest(arrivee)
-        print('coordDest',coordDest)
-        coordSrc=setDest(depart)
-        print('coordSrc',coordSrc)
+        
+        #arrivee=get_destination(arrivee)
+        #depart=get_source(depart)
+        #print(arrivee)
+        #print(depart)
+        coordDest=get_destination(arrivee)
+        coordSrc=get_destination(depart)
+        distance=calcul_distance(depart,arrivee)
+        bornes=trajectory(depart, arrivee, 200, 50)
         duree=duration(coordDest,coordSrc)
-        return render_template("index.html",depart=depart,arrivee=arrivee, duree=duree)
+        return render_template("index.html",depart=depart,arrivee=arrivee, duree=duree, distance=distance,bornes=bornes)
 
     
 

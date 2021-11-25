@@ -7,34 +7,17 @@ Created on Thu Oct  7 11:53:34 2021
 
 import requests
 import json
-
-#Récuperer les valeurs de l'api https://opendata.reseaux-energies.fr/explore/dataset/bornes-irve/api/?disjunctive.region&geofilter.distance=48.8520930694,2.34738897685,1000&geofilter.polygon=&refine.region=%C3%8Ele-de-France&dataChart=eyJxdWVyaWVzIjpbeyJjaGFydHMiOlt7InR5cGUiOiJjb2x1bW4iLCJmdW5jIjoiQ09VTlQiLCJ5QXhpcyI6ImNvZGVfaW5zZWUiLCJzY2llbnRpZmljRGlzcGxheSI6dHJ1ZSwiY29sb3IiOiIjNjZjMmE1In1dLCJ4QXhpcyI6InJlZ2lvbiIsIm1heHBvaW50cyI6IiIsInRpbWVzY2FsZSI6IiIsInNvcnQiOiJzZXJpZTEtMSIsImNvbmZpZyI6eyJkYXRhc2V0IjoiYm9ybmVzLWlydmUiLCJvcHRpb25zIjp7ImRpc2p1bmN0aXZlLnJlZ2lvbiI6dHJ1ZSwiZ2VvZmlsdGVyLmRpc3RhbmNlIjoiNDguODUyMDkzMDY5NCwyLjM0NzM4ODk3Njg1LDEwMDAiLCJnZW9maWx0ZXIucG9seWdvbiI6IiIsInJlZmluZS5yZWdpb24iOiJcdTAwQ0VsZS1kZS1GcmFuY2UifX19XSwiZGlzcGxheUxlZ2VuZCI6dHJ1ZSwiYWxpZ25Nb250aCI6dHJ1ZSwidGltZXNjYWxlIjoiIn0%3D
-url_ile_de_france = "https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=bornes-irve&q=&facet=region&refine.region=%C3%8Ele-de-France&geofilter.distance=48.8520930694%2C2.34738897685%2C1000"
-content=requests.get(url_ile_de_france)
-data=content.json()
-for distance in data["records"]:
-        #afficher les distances du json
-        print(distance["fields"]["dist"])
-        #afficher les adresses du json
-        print(distance["fields"]["ad_station"])
-        
-
-#Récuperer les valeurs de l'api https://opendata.reseaux-energies.fr/explore/dataset/bornes-irve/api/?disjunctive.region&geofilter.distance=48.8520930694,2.34738897685,1000&geofilter.polygon=&refine.region=%C3%8Ele-de-France&dataChart=eyJxdWVyaWVzIjpbeyJjaGFydHMiOlt7InR5cGUiOiJjb2x1bW4iLCJmdW5jIjoiQ09VTlQiLCJ5QXhpcyI6ImNvZGVfaW5zZWUiLCJzY2llbnRpZmljRGlzcGxheSI6dHJ1ZSwiY29sb3IiOiIjNjZjMmE1In1dLCJ4QXhpcyI6InJlZ2lvbiIsIm1heHBvaW50cyI6IiIsInRpbWVzY2FsZSI6IiIsInNvcnQiOiJzZXJpZTEtMSIsImNvbmZpZyI6eyJkYXRhc2V0IjoiYm9ybmVzLWlydmUiLCJvcHRpb25zIjp7ImRpc2p1bmN0aXZlLnJlZ2lvbiI6dHJ1ZSwiZ2VvZmlsdGVyLmRpc3RhbmNlIjoiNDguODUyMDkzMDY5NCwyLjM0NzM4ODk3Njg1LDEwMDAiLCJnZW9maWx0ZXIucG9seWdvbiI6IiIsInJlZmluZS5yZWdpb24iOiJcdTAwQ0VsZS1kZS1GcmFuY2UifX19XSwiZGlzcGxheUxlZ2VuZCI6dHJ1ZSwiYWxpZ25Nb250aCI6dHJ1ZSwidGltZXNjYWxlIjoiIn0%3D
-#geofilter.distance=48.8520930694,2.34738897685,1000 == ile de france
-url_ile_de_france = "https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=bornes-irve&q=&facet=region&refine.region=%C3%8Ele-de-France&geofilter.distance=48.8520930694%2C2.34738897685%2C1000"
-content=requests.get(url_ile_de_france)
-data=content.json()
-for distance in data["records"]:
-        #afficher les distances du json
-        print(distance["fields"]["dist"])
-        #afficher les adresses du json
-        print(distance["fields"]["ad_station"])
-        print(distance["fields"]["xlongitude"])
+from logging import info
+import urllib.request, json
+from geopy.geocoders import Nominatim
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 
-def setDest(adresse_dest):
-        # fonction 
+
+#fonction qui permet de recuperer les coordonnées gps (longitude,latitude) d'une destination 
+def get_destination(adresse_dest):
         url = 'https://api-adresse.data.gouv.fr/search/?q='
 
         requete = url + adresse_dest
@@ -53,8 +36,8 @@ def setDest(adresse_dest):
         coordDest=[longitude_dst,latitude_dst]
         return  coordDest
 
-def setSource(adresse_src):
-        # fonction 
+#fonction qui permet de retourner les coordonnées gps (longitude,latitude) d'une source
+def get_source(adresse_src): 
         url = 'https://api-adresse.data.gouv.fr/search/?q='
 
         requete = url + adresse_src
@@ -83,9 +66,11 @@ lat_2=45.64720916748047
 lon_2=5.860020160675049
 """
 
-def  duration(coordDest,coordSrc):
-        #coordDest=setDest('Valence')
-        #coordSrc=setSource('Lyon')
+#fonction qui permet de calculer la durée d'un trajet à partir des cordonnées gps récupérées par les fonction get_source et get_destination
+def duration(coordDest,coordSrc):
+
+        #coordDest=get_destination('Valence')
+        #coordSrc=get_source('Lyon')
         r = requests.get(f"http://router.project-osrm.org/route/v1/car/{coordDest[0]},{coordDest[1]};{coordSrc[0]},{coordSrc[1]}?overview=false""")
         # then you load the response using the json libray
         # by default you get only one alternative so you access 0-th element of the `routes`
@@ -99,7 +84,23 @@ def  duration(coordDest,coordSrc):
         print('min',min)
         print('heure',heure)
         return heure
-        
+
+
+#Récuperer les valeurs de l'api https://opendata.reseaux-energies.fr/explore/dataset/bornes-irve/api/?disjunctive.region&geofilter.distance=48.8520930694,2.34738897685,1000&geofilter.polygon=&refine.region=%C3%8Ele-de-France&dataChart=eyJxdWVyaWVzIjpbeyJjaGFydHMiOlt7InR5cGUiOiJjb2x1bW4iLCJmdW5jIjoiQ09VTlQiLCJ5QXhpcyI6ImNvZGVfaW5zZWUiLCJzY2llbnRpZmljRGlzcGxheSI6dHJ1ZSwiY29sb3IiOiIjNjZjMmE1In1dLCJ4QXhpcyI6InJlZ2lvbiIsIm1heHBvaW50cyI6IiIsInRpbWVzY2FsZSI6IiIsInNvcnQiOiJzZXJpZTEtMSIsImNvbmZpZyI6eyJkYXRhc2V0IjoiYm9ybmVzLWlydmUiLCJvcHRpb25zIjp7ImRpc2p1bmN0aXZlLnJlZ2lvbiI6dHJ1ZSwiZ2VvZmlsdGVyLmRpc3RhbmNlIjoiNDguODUyMDkzMDY5NCwyLjM0NzM4ODk3Njg1LDEwMDAiLCJnZW9maWx0ZXIucG9seWdvbiI6IiIsInJlZmluZS5yZWdpb24iOiJcdTAwQ0VsZS1kZS1GcmFuY2UifX19XSwiZGlzcGxheUxlZ2VuZCI6dHJ1ZSwiYWxpZ25Nb250aCI6dHJ1ZSwidGltZXNjYWxlIjoiIn0%3D
+#geofilter.distance=48.8520930694,2.34738897685,1000 == ile de france
+def bornes(adresse_src,adresse_dest,dist):
+        coordSrc=get_source(adresse_src)
+        coordDest=get_destination(adresse_dest)
+        url = "https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=bornes-irve&q=&facet=region&refine.region=%C3%8Ele-de-France&geofilter.distance={long},{lat},{dist}"
+        content=requests.get(url)
+        data=content.json()
+        for distance in data["records"]:
+                #afficher les distances du json
+                print(distance["fields"]["dist"])
+                #afficher les adresses du json
+                print(distance["fields"]["ad_station"])
+                print(distance["fields"]["xlongitude"])
+               
 """
 coordDest[0]='4.9259615'
 coordDest[1]='44.9488295'
@@ -107,3 +108,112 @@ coordSrc[0]='5.860020160675049'
 coordSrc[1]='45.64720916748047'
 duration(coordDest[0],coordDest[1],coordSrc[0],coordSrc[1])
 """
+
+
+def parsage(data):
+    infos = ""
+    for items in data["records"]:
+        infos += str(items["fields"]["ad_station"])+" à "+str(round(float(items["fields"]["dist"])))+"m.\n"
+        #print ("Distance vers borne  "+str(items["fields"]["dist"]))  si je veux distance vers borne, c ici (pour distance totale)
+    return infos ## return to nearbornes
+
+
+def nearBornes(lat, long, peri):    
+    # Récupération du json avec les params.
+    with urllib.request.urlopen("https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=bornes-irve&q=&facet=region&geofilter.distance="+str(lat)+"%2C"+str(long)+"%2C"+str(peri)+"") as url:
+        data = json.loads(url.read().decode())
+    
+   # Vérification de la présence de bornes dans le périmetre.
+    if data["nhits"] == 0:
+        peri = peri + 5000
+        ## au dessus , ça augmente la largeur de périmètre recherche de borne
+        ## if peri > xx , mettre une limite au périmètre de recherche ==> 
+        #infos = "Pas de borne à moins de "+peri+"km"
+        #break 
+        infos = nearBornes(lat, long, peri)
+    else:
+        infos = parsage(data)
+        
+    return infos
+
+def calcul_distance(depart, arrive):
+        coordSrc=get_source(depart)
+        coordDest=get_destination(arrive)
+        r = requests.get(f"http://router.project-osrm.org/route/v1/car/{coordDest[0]},{coordDest[1]};{coordSrc[0]},{coordSrc[1]}?overview=false""")
+        # then you load the response using the json libray
+        # by default you get only one alternative so you access 0-th element of the `routes`
+        dist = json.loads(r.content)
+        distance = dist.get("distance")
+        print('distance',dist)
+        return distance
+
+    
+
+def trajectory(departure, arrival, carautonomy, marginseekingborne):
+
+    departure = requestCoordonates(departure)
+    arrival = requestCoordonates(arrival)
+    coord = str(departure.latitude)+","+str(departure.longitude)+";"+str(arrival.latitude)+","+str(arrival.longitude)
+
+    Trajectorydistancereq = "http://router.project-osrm.org/route/v1/driving/"+coord+"?overview=false"
+    with urllib.request.urlopen(Trajectorydistancereq) as url:
+        data = json.loads(url.read().decode())
+
+    for items in data["routes"]:
+        for elements in items["legs"]:
+            distance = elements["distance"]
+    distance = distance/1000
+
+    listStop = needBreak(departure.latitude, departure.longitude, arrival.latitude, arrival.longitude, distance, carautonomy, marginseekingborne)
+  
+    print("\n\nDistance a parcourir :"+str(distance)+"  hors écart pour les bornes\n\n")
+    print("Liste des arrêts:\n\n"+str(listStop))
+   ## print("Distance a parcourir : en prenant en compte les détours pour les bornes") si somme des distances relevés vers bornes +*2 (écart route, retour sur route...)
+    return "\n\nDistance a parcourir :"+str(distance)+"\n\n"+str(listStop)
+
+
+def needBreak(latDep, longDep, latArr, longArr, dist, carautonomy, marginseekingborne ):
+## c ici qu'on peut ajouter la pec de la marge (en % ou fixée) (car = car-marge , ce qui force ajout de marge dans recherche des bornes)
+    distcar= carautonomy - marginseekingborne
+    if dist < distcar:
+        return 0
+    else:
+        nrbBreak = round(dist/distcar)
+        latDist = latDep - latArr
+        longDist = longDep - longArr
+
+        latEtapedist = latDist / nrbBreak
+        longEtapedist = longDist / nrbBreak
+
+        nbr = 0
+        listStop = ""
+        while nrbBreak != 0:
+            nbr += 1
+
+            if latDep < latArr:
+                latDep = latDep + latEtapedist
+            else: 
+                latDep = latDep - latEtapedist
+            if longDep > longArr:
+                longDep = longDep + longEtapedist
+            else:
+                longDep = longDep - longEtapedist
+
+            #print("########## \n\n\n"+str(latDep)+"\n"+str(longDep)+"\n\n\n##########\n")
+            listStop += "Arret n°"+str(nbr)+": \n\n"+str(nearBornes (latDep, longDep, 5000))+"\n\n"
+            nrbBreak = nrbBreak - 1
+        return listStop ## return vers trajectory
+
+
+
+
+def requestCoordonates(city):
+    geolocator = Nominatim(user_agent="ATR")
+    coord = geolocator.geocode(city)
+    return coord
+
+
+trajectory("Chambéry","Valence",400,50)
+## 400 autonomy
+## 50 margin (how many km before running out of electrecity do we devy to get to "recharger")
+calcul_distance('Chambéry', 'Valence')

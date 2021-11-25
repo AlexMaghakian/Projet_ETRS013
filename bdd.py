@@ -11,11 +11,11 @@ import psycopg2
 def autonomie():
     try:
         conn = psycopg2.connect(
-            user = "ilawzmnlunxuiy",
-            password = "5104cead965e1a18bc822c7611725f5e67cf99eb68f2db1c403ccc1d3b5f0050",
-            host = "ec2-52-213-119-221.eu-west-1.compute.amazonaws.com",
-            port = "5432",
-            database = "damtnm2jbpjhko"
+            user = "NcgkvMjQrX",
+            password = "NcgkvMjQrX",
+            host = "sql11.freesqldatabase.com",
+            port = "3306",
+            database = "sql11454096"
         )
         cur = conn.cursor()
 

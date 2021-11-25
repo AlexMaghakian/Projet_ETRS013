@@ -5,6 +5,14 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
+def parsage(data):
+    infos = ""
+    for items in data["records"]:
+        infos += str(items["fields"]["ad_station"])+" à "+str(round(float(items["fields"]["dist"])))+"m.\n"
+        #print ("Distance vers borne  "+str(items["fields"]["dist"]))  si je veux distance vers borne, c ici (pour distance totale)
+    return infos ## return to nearbornes
+
+
 def nearBornes(lat, long, peri):    
     # Récupération du json avec les params.
     with urllib.request.urlopen("https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=bornes-irve&q=&facet=region&geofilter.distance="+str(lat)+"%2C"+str(long)+"%2C"+str(peri)+"") as url:
@@ -24,18 +32,11 @@ def nearBornes(lat, long, peri):
     return infos ## return vers need break
 
 
-def parsage(data):
-    infos = ""
-    for items in data["records"]:
-        infos += str(items["fields"]["ad_station"])+" à "+str(round(float(items["fields"]["dist"])))+"m.\n"
 
-    return infos ## return vers nearbornes
+def trajectory(departure, arrival, carautonomy, marginseekingborne):
 
-
-def trajectory(departure, arrival, car):
-
-    departure = getCoordonates(departure)
-    arrival = getCoordonates(arrival)
+    departure = requestCoordonates(departure)
+    arrival = requestCoordonates(arrival)
     coord = str(departure.latitude)+","+str(departure.longitude)+";"+str(arrival.latitude)+","+str(arrival.longitude)
 
     Trajectorydistancereq = "http://router.project-osrm.org/route/v1/driving/"+coord+"?overview=false"
@@ -47,23 +48,26 @@ def trajectory(departure, arrival, car):
             distance = elements["distance"]
     distance = distance/1000
 
-    listStop = needBreak(departure.latitude, departure.longitude, arrival.latitude, arrival.longitude, distance, car)
+    listStop = needBreak(departure.latitude, departure.longitude, arrival.latitude, arrival.longitude, distance, carautonomy, marginseekingborne)
   
-    print("\n\nDistance a parcourir :"+str(distance)+"\n\n"+str(listStop))
+    print("\n\nDistance a parcourir :"+str(distance)+"  hors écart pour les bornes\n\n")
+    print("Liste des arrêtes:\n\n"+str(listStop))
+   ## print("Distance a parcourir : en prenant en compte les détours pour les bornes") si somme des distances relevés vers bornes +*2 (écart route, retour sur route...)
     return "\n\nDistance a parcourir :"+str(distance)+"\n\n"+str(listStop)  ## reutrn vers affichage principal
 
 
-def needBreak(latDep, longDep, latArr, longArr, dist, car):
+def needBreak(latDep, longDep, latArr, longArr, dist, carautonomy, marginseekingborne ):
 ## c ici qu'on peut ajouter la pec de la marge (en % ou fixée) (car = car-marge , ce qui force ajout de marge dans recherche des bornes)
-    if dist < car:
+    distcar= carautonomy - marginseekingborne
+    if dist < distcar:
         return 0
     else:
-        nrbBreak = round(dist/car)
-        latDiff = latDep - latArr
-        longDiff = longDep - longArr
+        nrbBreak = round(dist/distcar)
+        latDist = latDep - latArr
+        longDist = longDep - longArr
 
-        latDiff = latDiff / nrbBreak
-        longDiff = longDiff / nrbBreak
+        latEtapedist = latDist / nrbBreak
+        longEtapedist = longDist / nrbBreak
 
         nbr = 0
         listStop = ""
@@ -71,26 +75,28 @@ def needBreak(latDep, longDep, latArr, longArr, dist, car):
             nbr += 1
 
             if latDep < latArr:
-                latDep = latDep + latDiff
+                latDep = latDep + latEtapedist
             else: 
-                latDep = latDep - latDiff
+                latDep = latDep - latEtapedist
             if longDep > longArr:
-                longDep = longDep + longDiff
+                longDep = longDep + longEtapedist
             else:
-                longDep = longDep - longDiff
+                longDep = longDep - longEtapedist
 
             #print("########## \n\n\n"+str(latDep)+"\n"+str(longDep)+"\n\n\n##########\n")
-            listStop += "Pour l'arret n°"+str(nbr)+": \n\n"+str(nearBornes (latDep, longDep, 5000))+"\n\n"
+            listStop += "Arret n°"+str(nbr)+": \n\n"+str(nearBornes (latDep, longDep, 5000))+"\n\n"
             nrbBreak = nrbBreak - 1
         return listStop ## return vers trajectory
 
 
 
 
-def getCoordonates(city):
+def requestCoordonates(city):
     geolocator = Nominatim(user_agent="ATR")
     coord = geolocator.geocode(city)
     return coord
 
 
-trajectory("Paris","Toulouse",200)
+trajectory("Chambéry","Toulouse",400,50)
+## 400 autonomy
+## 50 margin (how many km before running out of electrecity do we devy to get to "recharger")
