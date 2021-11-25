@@ -1,0 +1,15 @@
+Heroku credentials
+Host:
+ec2-52-213-119-221.eu-west-1.compute.amazonaws.com
+Database:
+damtnm2jbpjhko
+User:
+ilawzmnlunxuiy
+Port:
+5432
+Password:
+5104cead965e1a18bc822c7611725f5e67cf99eb68f2db1c403ccc1d3b5f0050
+URI:
+postgres://ilawzmnlunxuiy:5104cead965e1a18bc822c7611725f5e67cf99eb68f2db1c403ccc1d3b5f0050@ec2-52-213-119-221.eu-west-1.compute.amazonaws.com:5432/damtnm2jbpjhko
+Heroku CLI:
+heroku pg:psql postgresql-infinite-36869 --app etrs013
