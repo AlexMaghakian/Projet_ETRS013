@@ -97,6 +97,6 @@ def requestCoordonates(city):
     return coord
 
 
-trajectory("Chambéry","Toulouse",400,50)
+trajectory("Lyon","Nantes",200,50)
 ## 400 autonomy
 ## 50 margin (how many km before running out of electrecity do we devy to get to "recharger")

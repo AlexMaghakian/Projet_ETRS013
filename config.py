@@ -76,6 +76,7 @@ def duration(coordDest,coordSrc):
         # by default you get only one alternative so you access 0-th element of the `routes`
         routes = json.loads(r.content)
         route_1 = routes.get("routes")[0]
+        print('route_1',route_1)
         print('routes',routes)
         #print(route_1)
         time=(route_1["duration"])
@@ -128,8 +129,6 @@ def nearBornes(lat, long, peri):
         peri = peri + 5000
         ## au dessus , ça augmente la largeur de périmètre recherche de borne
         ## if peri > xx , mettre une limite au périmètre de recherche ==> 
-        #infos = "Pas de borne à moins de "+peri+"km"
-        #break 
         infos = nearBornes(lat, long, peri)
     else:
         infos = parsage(data)
@@ -143,8 +142,15 @@ def calcul_distance(depart, arrive):
         # then you load the response using the json libray
         # by default you get only one alternative so you access 0-th element of the `routes`
         dist = json.loads(r.content)
-        distance = dist.get("distance")
-        print('distance',dist)
+        dist_1 = dist.get("routes")[0]
+        for items in dist["routes"]:
+            for elements in items["legs"]:
+                distance = elements["distance"]
+                distance=distance/1000
+                #print('distance',distance)
+        #distance=(dist_1["distance"])
+        #distance = dist.get("distance")
+        #print('distance',distance)
         return distance
 
     
@@ -168,7 +174,7 @@ def trajectory(departure, arrival, carautonomy, marginseekingborne):
   
     print("\n\nDistance a parcourir :"+str(distance)+"  hors écart pour les bornes\n\n")
     print("Liste des arrêts:\n\n"+str(listStop))
-   ## print("Distance a parcourir : en prenant en compte les détours pour les bornes") si somme des distances relevés vers bornes +*2 (écart route, retour sur route...)
+    #print("Distance a parcourir : en prenant en compte les détours pour les bornes")
     return "\n\nDistance a parcourir :"+str(distance)+"\n\n"+str(listStop)
 
 
@@ -213,7 +219,10 @@ def requestCoordonates(city):
     return coord
 
 
-trajectory("Chambéry","Valence",400,50)
+#trajectory("Lyon","Nantes",200,50)
 ## 400 autonomy
 ## 50 margin (how many km before running out of electrecity do we devy to get to "recharger")
-calcul_distance('Chambéry', 'Valence')
+#coordDest=get_destination('Valence')
+#coordSrc=get_source('Lyon')
+#duration(coordSrc,coordDest)
+#calcul_distance('Chambéry', 'Valence')
