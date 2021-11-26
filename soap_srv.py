@@ -8,19 +8,20 @@ from spyne.decorator import rpc
 from spyne.model.primitive import Integer, Unicode
 from spyne.model.complex import Iterable
 from wsgiref.simple_server import make_server
-from config import *
-from Client_projet import *
+#from config import *
+from client_soap2 import *
 
 class service(ServiceBase):
-    @rpc(String, String, Integer, _returns=String)
-    def infos(ctx, destination, departure, mileage):
-        return trajectory(destination, departure, mileage)
 
     @rpc(Integer, Integer,Integer,  _returns=Iterable(Integer))
-    def time_calculation (time,distance, autonomie, temps_rechargement):
-        data=autonmie1()
-        print('data',data)
-        return duration()
+    def time_calculation(ctx, time, distance, autonomie, temps_rechargement):
+        distance=1000
+        all=get_autonomie('Renault Zoe')
+        autonomie=all[2]
+        temps_rechargement=all[1]
+        time=distance/100 - autonomie + temps_rechargement
+        return time
+    
     
 application = Application(
     [service],

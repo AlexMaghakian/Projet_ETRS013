@@ -11,25 +11,6 @@ from config import *
 
 app = Flask(__name__)
 api = Api(app)
-"""
-class HelloWorld(Resource):
-    def get(self):
-        return {'hello': 'world'}
-
-api.add_resource(HelloWorld, '/')
-
-class Response():
-    status = 200
-    mimetype = "text/html"
-   
-class Usersimple(Resource):
-    def get(self, user_id):
-        return Response(response=render_template('index.html'))
-
-    def put(self, user_id):
-        userlist[user_id] = request.form['data']
-        return {'hello to you': userlist[user_id]}
-"""
 
 coordDest=get_destination('Valence')
 coordSrc=get_source('Paris')

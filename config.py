@@ -111,15 +111,16 @@ duration(coordDest[0],coordDest[1],coordSrc[0],coordSrc[1])
 """
 
 
-def parsage(data):
+def parseur(data):
     infos = ""
     for items in data["records"]:
         infos += str(items["fields"]["ad_station"])+" à "+str(round(float(items["fields"]["dist"])))+"m.\n"
         #print ("Distance vers borne  "+str(items["fields"]["dist"]))  si je veux distance vers borne, c ici (pour distance totale)
-    return infos ## return to nearbornes
+    return infos ## return to BorneClose
 
 
-def nearBornes(lat, long, peri):    
+#fonction qui cherche et retourne la liste des arrêts pour chaque etapes dans un certain perimètre
+def BorneClose(lat, long, peri):    
     # Récupération du json avec les params.
     with urllib.request.urlopen("https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=bornes-irve&q=&facet=region&geofilter.distance="+str(lat)+"%2C"+str(long)+"%2C"+str(peri)+"") as url:
         data = json.loads(url.read().decode())
@@ -127,20 +128,18 @@ def nearBornes(lat, long, peri):
    # Vérification de la présence de bornes dans le périmetre.
     if data["nhits"] == 0:
         peri = peri + 5000
-        ## au dessus , ça augmente la largeur de périmètre recherche de borne
-        ## if peri > xx , mettre une limite au périmètre de recherche ==> 
-        infos = nearBornes(lat, long, peri)
+        infos = BorneClose(lat, long, peri)
     else:
-        infos = parsage(data)
+        infos = parseur(data)
         
     return infos
 
+#fonction qui permet de calculer la distance entre 2 villes
+#je recupere les coordonnée gps lat long des fonctions get_source et get_destination et je les inseère dans l'url de l'api
 def calcul_distance(depart, arrive):
         coordSrc=get_source(depart)
         coordDest=get_destination(arrive)
         r = requests.get(f"http://router.project-osrm.org/route/v1/car/{coordDest[0]},{coordDest[1]};{coordSrc[0]},{coordSrc[1]}?overview=false""")
-        # then you load the response using the json libray
-        # by default you get only one alternative so you access 0-th element of the `routes`
         dist = json.loads(r.content)
         dist_1 = dist.get("routes")[0]
         for items in dist["routes"]:
@@ -154,15 +153,16 @@ def calcul_distance(depart, arrive):
         return distance
 
     
+#fonction qui peret de tracer une ligne droite et de couper en part egale à l'autonomie
+#permet de trouver des bornes pour chaque etapes
+def trajectoire(depart, arrivee, autonomy, marge):
 
-def trajectory(departure, arrival, carautonomy, marginseekingborne):
+    depart = requestCoordonates(depart)
+    arrivee = requestCoordonates(arrivee)
+    coord = str(depart.latitude)+","+str(depart.longitude)+";"+str(arrivee.latitude)+","+str(arrivee.longitude)
 
-    departure = requestCoordonates(departure)
-    arrival = requestCoordonates(arrival)
-    coord = str(departure.latitude)+","+str(departure.longitude)+";"+str(arrival.latitude)+","+str(arrival.longitude)
-
-    Trajectorydistancereq = "http://router.project-osrm.org/route/v1/driving/"+coord+"?overview=false"
-    with urllib.request.urlopen(Trajectorydistancereq) as url:
+    Trajectoiredistancereq = "http://router.project-osrm.org/route/v1/driving/"+coord+"?overview=false"
+    with urllib.request.urlopen(Trajectoiredistancereq) as url:
         data = json.loads(url.read().decode())
 
     for items in data["routes"]:
@@ -170,17 +170,17 @@ def trajectory(departure, arrival, carautonomy, marginseekingborne):
             distance = elements["distance"]
     distance = distance/1000
 
-    listStop = needBreak(departure.latitude, departure.longitude, arrival.latitude, arrival.longitude, distance, carautonomy, marginseekingborne)
+    listStop = needBreak(depart.latitude, depart.longitude, arrivee.latitude, arrivee.longitude, distance, autonomy, marge)
   
     print("\n\nDistance a parcourir :"+str(distance)+"  hors écart pour les bornes\n\n")
     print("Liste des arrêts:\n\n"+str(listStop))
     #print("Distance a parcourir : en prenant en compte les détours pour les bornes")
     return "\n\nDistance a parcourir :"+str(distance)+"\n\n"+str(listStop)
 
-
-def needBreak(latDep, longDep, latArr, longArr, dist, carautonomy, marginseekingborne ):
+#fonction permet de diviser diviser la trajectoire en plusieurs etapes et donner la localisation des etapes pour les reutiliser dans la fonction trajectoire 
+def needBreak(latDep, longDep, latArr, longArr, dist, autonomy, marge ):
 ## c ici qu'on peut ajouter la pec de la marge (en % ou fixée) (car = car-marge , ce qui force ajout de marge dans recherche des bornes)
-    distcar= carautonomy - marginseekingborne
+    distcar= autonomy - marge
     if dist < distcar:
         return 0
     else:
@@ -205,10 +205,9 @@ def needBreak(latDep, longDep, latArr, longArr, dist, carautonomy, marginseeking
             else:
                 longDep = longDep - longEtapedist
 
-            #print("########## \n\n\n"+str(latDep)+"\n"+str(longDep)+"\n\n\n##########\n")
-            listStop += "Arret n°"+str(nbr)+": \n\n"+str(nearBornes (latDep, longDep, 5000))+"\n\n"
+            listStop += "Arret n°"+str(nbr)+": \n\n"+str(BorneClose (latDep, longDep, 5000))+"\n\n"
             nrbBreak = nrbBreak - 1
-        return listStop ## return vers trajectory
+        return listStop ## return vers trajectoire
 
 
 
@@ -219,7 +218,7 @@ def requestCoordonates(city):
     return coord
 
 
-#trajectory("Lyon","Nantes",200,50)
+#trajectoire("Lyon","Nantes",200,50)
 ## 400 autonomy
 ## 50 margin (how many km before running out of electrecity do we devy to get to "recharger")
 #coordDest=get_destination('Valence')
