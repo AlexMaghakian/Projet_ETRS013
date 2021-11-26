@@ -9,6 +9,7 @@ from spyne.model.primitive import Integer, Unicode
 from spyne.model.complex import Iterable
 from wsgiref.simple_server import make_server
 from config import *
+from Client_projet import *
 
 class service(ServiceBase):
     @rpc(String, String, Integer, _returns=String)
@@ -17,7 +18,10 @@ class service(ServiceBase):
 
     @rpc(Integer, Integer,Integer,  _returns=Iterable(Integer))
     def time_calculation (time,distance, autonomie, temps_rechargement):
+        data=autonmie1()
+        print('data',data)
         return duration()
+    
 application = Application(
     [service],
     'spyne.examples.hello.soap',

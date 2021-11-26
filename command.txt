@@ -1,0 +1,7 @@
+# Identity Name
+git config --global user.name "Projet-API"
+
+# Identity Email
+git config --global user.email "alex.maghakian@master-stic.fr"
+
+flask run --host=0.0.0.0
