@@ -37,7 +37,7 @@ def resultat():
         coordDest=get_destination(arrivee)
         coordSrc=get_destination(depart)
         distance=calcul_distance(depart,arrivee)
-        bornes=trajectory(depart, arrivee, 200, 50)
+        bornes=trajectoire(depart, arrivee, 200, 50)
         #bornes=nearBornes(coordSrc[0], coordSrc[1], 50)
         duree=duration(coordDest,coordSrc)
         return render_template("index.html",depart=depart,arrivee=arrivee, duree=duree, distance=distance,bornes=bornes)
